@@ -1,4 +1,3 @@
-using System.Reflection.Emit;
 using AzureAppConfigDemo;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
@@ -11,6 +10,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     options
         .Connect(connectionString)
         .Select("TestApp:*", LabelFilter.Null)
+        .Select("TestApp:*", builder.Environment.EnvironmentName)
         .ConfigureRefresh(refreshOptions =>
         {
             // Default cache expiration is 30 seconds, lowering it for demo purposes.
