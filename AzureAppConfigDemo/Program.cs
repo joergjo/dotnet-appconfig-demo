@@ -1,5 +1,6 @@
 using AzureAppConfigDemo;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +18,17 @@ builder.Configuration.AddAzureAppConfiguration(options =>
             refreshOptions
                 .Register("TestApp:Settings:Sentinel", refreshAll: true)
                 .SetCacheExpiration(TimeSpan.FromSeconds(15));
-        });
+        })
+        .UseFeatureFlags();
 });
 
 builder.Services.AddRazorPages();
 // Add App Configuration middleware.
 builder.Services.AddAzureAppConfiguration();
+
+// Add feature management services.
+builder.Services.AddFeatureManagement();
+
 
 builder.Services.Configure<Settings>(builder.Configuration.GetSection("TestApp:Settings"));
 
