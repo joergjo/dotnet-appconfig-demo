@@ -1,21 +1,30 @@
+using Azure.Identity;
 using AzureAppConfigDemo;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+var endpoint = builder.Configuration["AppConfig:Endpoint"];
 var connectionString = builder.Configuration.GetConnectionString("AppConfig");
-var snapshot = builder.Configuration.GetValue<string>("Snapshot");
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-    options
-        .Connect(connectionString)
-        .SelectSnapshot(snapshot);
+    var credential = new DefaultAzureCredential();
+    if (endpoint is { Length: > 0 })
+    {
+        options.Connect(new Uri(endpoint), credential);
+    }
+    else
+    {
+        options.Connect(connectionString);
+    }
+    options.ConfigureKeyVault(keyVaultOptions =>
+    {
+        keyVaultOptions.SetCredential(credential);
+    });
 });
 
 builder.Services.AddRazorPages();
-
 builder.Services.Configure<Settings>(builder.Configuration.GetSection("TestApp:Settings"));
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
