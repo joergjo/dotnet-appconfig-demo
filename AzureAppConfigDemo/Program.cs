@@ -25,6 +25,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.Configure<Settings>(builder.Configuration.GetSection("TestApp:Settings"));
+builder.Services.Configure<Secrets>(builder.Configuration.GetSection("TestApp:Secrets"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

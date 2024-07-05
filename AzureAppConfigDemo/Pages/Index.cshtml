@@ -18,5 +18,22 @@
 
 <div class="container-md">
     <h1>Welcome to Azure App Configuration Demo</h1>
-    <p>@Model.Settings.Message</p>
+    <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Source</th>
+            <th>Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Azure App Configuration</td>
+            <td>@Model.Settings.Message</td>
+        </tr>
+        <tr>
+            <td>Azure Key Vault</td>
+            <td>@Model.Secrets.Message</td>
+        </tr>
+    </tbody>
+</table>
 </div>
