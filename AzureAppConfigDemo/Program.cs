@@ -1,5 +1,6 @@
 using Azure.Identity;
 using AzureAppConfigDemo;
+using Microsoft.Extensions.Configuration.AzureAppConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,8 +29,9 @@ builder.Configuration.AddAzureAppConfiguration(options =>
             refreshOptions
                 .Register("TestApp:Settings:Sentinel", refreshAll: true)
                 .SetCacheExpiration(TimeSpan.FromSeconds(15));
-        });
-
+        })        
+        .Select("TestApp:*", LabelFilter.Null)
+        .Select("TestApp:*", builder.Environment.EnvironmentName);
 });
 
 builder.Services.AddRazorPages();
