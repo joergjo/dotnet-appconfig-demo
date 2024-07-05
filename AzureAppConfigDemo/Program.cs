@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var endpoint = builder.Configuration["AppConfig:Endpoint"];
 var connectionString = builder.Configuration.GetConnectionString("AppConfig");
+var snapshot = builder.Configuration["AppConfig:Snapshot"];
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     var credential = new DefaultAzureCredential();
@@ -18,20 +19,15 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     {
         options.Connect(connectionString);
     }
+    if (snapshot is { Length: > 0 })
+    {
+        options.SelectSnapshot(snapshot);
+    }
     options
         .ConfigureKeyVault(keyVaultOptions =>
         {
             keyVaultOptions.SetCredential(credential);
-        })
-        .ConfigureRefresh(refreshOptions =>
-        {
-            // Default cache expiration is 30 seconds, lowering it for demo purposes.
-            refreshOptions
-                .Register("TestApp:Settings:Sentinel", refreshAll: true)
-                .SetCacheExpiration(TimeSpan.FromSeconds(15));
-        })        
-        .Select("TestApp:*", LabelFilter.Null)
-        .Select("TestApp:*", builder.Environment.EnvironmentName);
+        });
 });
 
 builder.Services.AddRazorPages();
