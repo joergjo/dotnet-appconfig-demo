@@ -1,6 +1,7 @@
 using Azure.Identity;
 using AzureAppConfigDemo;
 using Microsoft.Extensions.Configuration.AzureAppConfiguration;
+using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,13 +32,17 @@ builder.Configuration.AddAzureAppConfiguration(options =>
                 .SetCacheExpiration(TimeSpan.FromSeconds(15));
         })        
         .Select("TestApp:*", LabelFilter.Null)
-        .Select("TestApp:*", builder.Environment.EnvironmentName);
+        .Select("TestApp:*", builder.Environment.EnvironmentName)
+        .UseFeatureFlags();
 });
 
 builder.Services.AddRazorPages();
 
 // Add App Configuration middleware.
 builder.Services.AddAzureAppConfiguration();
+
+// Add feature management services.
+builder.Services.AddFeatureManagement();
 
 builder.Services.Configure<Settings>(builder.Configuration.GetSection("TestApp:Settings"));
 builder.Services.Configure<Secrets>(builder.Configuration.GetSection("TestApp:Secrets"));
