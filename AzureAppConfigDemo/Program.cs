@@ -17,13 +17,26 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     {
         options.Connect(connectionString);
     }
-    options.ConfigureKeyVault(keyVaultOptions =>
-    {
-        keyVaultOptions.SetCredential(credential);
-    });
+    options
+        .ConfigureKeyVault(keyVaultOptions =>
+        {
+            keyVaultOptions.SetCredential(credential);
+        })
+        .ConfigureRefresh(refreshOptions =>
+        {
+            // Default cache expiration is 30 seconds, lowering it for demo purposes.
+            refreshOptions
+                .Register("TestApp:Settings:Sentinel", refreshAll: true)
+                .SetCacheExpiration(TimeSpan.FromSeconds(15));
+        });
+
 });
 
 builder.Services.AddRazorPages();
+
+// Add App Configuration middleware.
+builder.Services.AddAzureAppConfiguration();
+
 builder.Services.Configure<Settings>(builder.Configuration.GetSection("TestApp:Settings"));
 builder.Services.Configure<Secrets>(builder.Configuration.GetSection("TestApp:Secrets"));
 
@@ -36,6 +49,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Enable middleware to trigger request driven refresh.
+app.UseAzureAppConfiguration();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
